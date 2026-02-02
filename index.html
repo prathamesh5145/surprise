@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For Shikhaa 💖</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root{
+      --p1:#ffe3f3;
+      --p2:#ffc3dc;
+      --p3:#ff9dc8;
+
+      --glass: rgba(255,255,255,0.52);
+      --glass2: rgba(255,255,255,0.36);
+
+      --ink:#5b0031;
+      --muted: rgba(91,0,49,.65);
+
+      --yes:#ff2d7a;
+      --yesHover:#d90063;
+
+      --shadow: 0 25px 90px rgba(0,0,0,.18);
+      --soft: 0 16px 45px rgba(0,0,0,.14);
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background: radial-gradient(1200px 700px at 20% 10%, #ffffffaa, transparent 60%),
+                  linear-gradient(135deg,var(--p1),var(--p2),var(--p3));
+      font-family:"Poppins", system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      overflow:hidden;
+      padding:18px;
+      color:var(--ink);
+      position:relative;
+    }
+
+    /* Floating hearts background */
+    .float{
+      position:absolute;
+      top:-30px;
+      font-size:18px;
+      opacity:.55;
+      animation: fall 7.5s linear infinite;
+      pointer-events:none;
+      filter: drop-shadow(0 10px 12px rgba(0,0,0,.12));
+      user-select:none;
+    }
+    @keyframes fall{
+      from{ transform: translateY(-10vh) rotate(0deg); opacity:.6; }
+      to{ transform: translateY(115vh) rotate(120deg); opacity:0; }
+    }
+
+    /* Confetti canvas */
+    #confettiCanvas{
+      position:fixed; inset:0;
+      width:100vw; height:100vh;
+      pointer-events:none;
+      z-index:9999;
+    }
+
+    /* Card */
+    .card{
+      width:min(900px, 96vw);
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,.50);
+      backdrop-filter: blur(16px) saturate(180%);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+      position:relative;
+      animation: enter .9s ease;
+    }
+    @keyframes enter{
+      from{ opacity:0; transform: translateY(18px) scale(.98); }
+      to{ opacity:1; transform: translateY(0) scale(1); }
+    }
+
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:18px 20px 0;
+    }
+
+    /* Hanging hearts (like your reel) */
+    .hang{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .hang .strand{
+      width:2px; height:64px;
+      background: rgba(255,45,122,.35);
+      border-radius:99px;
+      position:relative;
+      transform-origin: top;
+      animation: swing 2.3s ease-in-out infinite;
+    }
+    .hang .strand:nth-child(2){ height:52px; animation-duration:2.6s; }
+    .hang .strand:nth-child(3){ height:70px; animation-duration:2.9s; }
+    .hang .strand::after{
+      content:"❤";
+      position:absolute;
+      left:50%; transform: translateX(-50%);
+      bottom:-18px;
+      font-size:22px;
+      color:#ff2d7a;
+      filter: drop-shadow(0 8px 10px rgba(0,0,0,.12));
+    }
+    @keyframes swing{
+      0%,100%{ transform: rotate(-6deg); }
+      50%{ transform: rotate(6deg); }
+    }
+
+    /* 14 Feb note */
+    .note{
+      width:92px; height:74px;
+      background: rgba(255,255,255,.65);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 14px;
+      box-shadow: var(--soft);
+      position:relative;
+      display:grid;
+      place-items:center;
+      transform: rotate(7deg);
+    }
+    .note::before{
+      content:"";
+      position:absolute;
+      top:-10px;
+      width:44px; height:16px;
+      border-radius:999px;
+      background: rgba(255,45,122,.16);
+      border: 1px solid rgba(255,45,122,.18);
+    }
+    .note b{
+      font-family:"Playfair Display", serif;
+      font-size:24px;
+      color:#d1005c;
+      line-height:1;
+      text-align:center;
+    }
+    .note small{
+      display:block;
+      margin-top:2px;
+      font-weight:800;
+      letter-spacing:1px;
+      color:rgba(209,0,92,.75);
+    }
+
+    /* Pages */
+    .page{
+      display:none;
+      padding: 14px 22px 24px;
+      min-height: 480px;
+    }
+    .page.active{ display:block; }
+
+    .center{
+      display:grid;
+      place-items:center;
+      text-align:center;
+      padding: 20px 10px 10px;
+      gap: 12px;
+    }
+
+    h1,h2{
+      font-family:"Playfair Display", serif;
+      margin:0;
+      color:#d1005c;
+      text-shadow: 0 2px 14px rgba(255,45,122,.20);
+    }
+    h1{ font-size: clamp(30px, 4vw, 52px); }
+    h2{ font-size: clamp(26px, 3.6vw, 44px); }
+
+    p{
+      margin:0;
+      color: var(--muted);
+      max-width: 62ch;
+      line-height:1.55;
+      font-size: 14.5px;
+    }
+
+    /* Cute illustration (simple SVG) */
+    .art{
+      width: min(280px, 78vw);
+      filter: drop-shadow(0 14px 22px rgba(0,0,0,.16));
+      margin-top: 4px;
+    }
+
+    /* Buttons */
+    .btn{
+      border:none;
+      cursor:pointer;
+      border-radius: 999px;
+      padding: 14px 26px;
+      font-weight:800;
+      font-size:16px;
+      transition: .22s ease;
+      box-shadow: 0 14px 34px rgba(0,0,0,.14);
+      user-select:none;
+    }
+    .btn.primary{
+      background: linear-gradient(135deg, var(--yes), #d1005c);
+      color:white;
+    }
+    .btn.primary:hover{ transform: translateY(-2px) scale(1.03); }
+    .btn.ghost{
+      background: rgba(255,255,255,.58);
+      color: rgba(60,0,30,.78);
+      border: 1px solid rgba(255,255,255,.65);
+    }
+    .btn.ghost:hover{ transform: translateY(-2px); }
+
+    /* Question button zone */
+    .zone{
+      margin-top: 8px;
+      width: min(520px, 92%);
+      height: 160px;
+      position:relative;
+      background: rgba(255,255,255,.22);
+      border: 1px solid rgba(255,255,255,.35);
+      border-radius: 22px;
+      box-shadow: 0 18px 44px rgba(0,0,0,.10);
+      overflow:hidden;
+    }
+    .zone button{
+      position:absolute;
+      top:50%;
+      transform: translateY(-50%);
+      min-width: 150px;
+    }
+    #yesBtn{ left: 18%; }
+    #noBtn{ left: 60%; }
+
+    .tinyhint{
+      font-size: 18px;
+      opacity:.72;
+      margin-top: 10px;
+    }
+
+    /* Celebrate page gifts */
+    .giftsWrap{
+      margin-top: 14px;
+      width: min(760px, 96%);
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 720px){
+      .giftsWrap{ grid-template-columns: 1fr; }
+    }
+
+    .gift{
+      background: rgba(255,255,255,.56);
+      border: 1px solid rgba(255,255,255,.65);
+      border-radius: 22px;
+      box-shadow: 0 18px 50px rgba(0,0,0,.12);
+      padding: 16px;
+      text-align:left;
+      position:relative;
+      overflow:hidden;
+      cursor:pointer;
+      transition: .22s ease;
+      min-height: 120px;
+    }
+    .gift:hover{ transform: translateY(-3px); }
+    .gift .tag{
+      display:inline-flex;
+      gap:8px;
+      align-items:center;
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-weight:900;
+      font-size: 12px;
+      color: rgba(209,0,92,.88);
+      background: rgba(255,45,122,.12);
+      border: 1px solid rgba(255,45,122,.14);
+    }
+    .gift h3{
+      margin: 10px 0 6px;
+      font-family:"Playfair Display", serif;
+      color:#a1004b;
+      font-size: 22px;
+    }
+    .gift small{
+      color: rgba(60,0,30,.65);
+      line-height:1.35;
+      display:block;
+    }
+
+    /* gift ribbon decoration */
+    .gift::before{
+      content:"";
+      position:absolute;
+      inset:auto -40px 20px auto;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle at 30% 30%, rgba(255,45,122,.18), transparent 55%);
+      transform: rotate(18deg);
+    }
+
+    /* Modal */
+    .modalBack{
+      position:fixed; inset:0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(8px);
+      display:none;
+      place-items:center;
+      z-index: 9998;
+      padding: 18px;
+    }
+    .modalBack.show{ display:grid; }
+
+    .modal{
+      width: min(720px, 96vw);
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.75);
+      border-radius: 26px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+      position:relative;
+      animation: pop .35s ease;
+    }
+    @keyframes pop{
+      from{ transform: translateY(10px) scale(.98); opacity:0; }
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+    .modalTop{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom: 8px;
+    }
+    .x{
+      width:44px; height:44px;
+      border-radius: 14px;
+      border: 1px solid rgba(0,0,0,.08);
+      background: rgba(255,255,255,.7);
+      cursor:pointer;
+      font-weight:900;
+    }
+    .modal h3{
+      margin:0;
+      font-family:"Playfair Display", serif;
+      color:#a1004b;
+      font-size: 26px;
+    }
+    .modal p{
+      margin-top: 8px;
+      color: rgba(60,0,30,.72);
+      font-size: 14.5px;
+    }
+    .media{
+      margin-top: 12px;
+      border-radius: 18px;
+      overflow:hidden;
+      border: 1px solid rgba(0,0,0,.06);
+      background: rgba(255,255,255,.55);
+      min-height: 220px;
+      display:grid;
+      place-items:center;
+      color: rgba(60,0,30,.55);
+      text-align:center;
+      padding: 14px;
+    }
+    .media img{
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      display:block;
+    }
+
+    .frogArt {
+      width: 260px;
+      max-width: 80%;
+      display: block;
+      margin: 0 auto 10px;
+      filter: drop-shadow(0 18px 35px rgba(0,0,0,0.22));
+      border-radius: 14px; /* keeps the edges soft */
+      object-fit: contain;
+    }
+
+  </style>
+</head>
+
+<body>
+  <canvas id="confettiCanvas"></canvas>
+
+  <script>
+    // floating hearts like the reel vibe
+    const hearts = ["❤","💗","💖","💞"];
+    for(let i=0;i<22;i++){
+      const h=document.createElement("div");
+      h.className="float";
+      h.textContent=hearts[Math.floor(Math.random()*hearts.length)];
+      h.style.left=(Math.random()*100)+"vw";
+      h.style.animationDelay=(Math.random()*5)+"s";
+      h.style.fontSize=(14+Math.random()*22)+"px";
+      h.style.opacity=(0.35+Math.random()*0.35).toFixed(2);
+      document.body.appendChild(h);
+    }
+  </script>
+
+  <main class="card">
+    <div class="topbar">
+      <div class="hang" aria-hidden="true">
+        <div class="strand"></div>
+        <div class="strand"></div>
+        <div class="strand"></div>
+      </div>
+
+      <div class="note" aria-label="Date note">
+        <div>
+          <b>14</b>
+          <small>FEB</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE 1: Intro -->
+    <section class="page active" id="pageIntro">
+      <div class="center">
+        <!-- Replace old SVG with this frog -->
+        <img src="C:/Users/Prathmesh.chavan/OneDrive%20-%20aeonx.digital/Desktop/DD/assets/frog.png" class="frogArt" alt="Cute Frog">
+
+
+        <h1>Hey Shikhaa💗</h1>
+        <p>I made a something for you.</p>
+
+        <button class="btn primary" id="startBtn">Start</button>
+        <div class="footerHint">Awww! I can already see that smile on you😁.</div>
+      </div>
+    </section>
+
+    <!-- PAGE 2: Question -->
+    <section class="page" id="pageAsk">
+      <div class="center">
+        <h1>Will you be my Valentine?</h1>
+        <p>No pressure😄</p>
+
+        <div class="zone" id="zone">
+          <button class="btn primary" id="yesBtn">Yes</button>
+          <button class="btn ghost" id="noBtn">No</button>
+        </div>
+
+        <div class="tinyhint" id="hint">The “No” button is practicing frog hops😅</div>
+      </div>
+    </section>
+
+    <!-- PAGE 3: Celebrate + Gifts -->
+    <section class="page" id="pageYes">
+      <div class="center">
+        <h2>Yay, you said YES! 🎉</h2>
+        <p>Aww! Here’s a virtual hug for now—just enough to make you wonder how much better the real one feels.</p>
+        <img src="C:/Users/Prathmesh.chavan/OneDrive%20-%20aeonx.digital/Desktop/DD/assets/cat.gif" class="frogArt" alt="Cute Frog">
+<!--
+        <div class="giftsWrap">
+          <div class="gift" data-gift="1">
+            <div class="tag">🎁 Gift 1</div>
+            <h3>Open me</h3>
+            <small>A sweet message (and maybe a photo).</small>
+          </div>
+
+          <div class="gift" data-gift="2">
+            <div class="tag">🎁 Gift 2</div>
+            <h3>Open me</h3>
+            <small>A “coupon” she can redeem anytime 😏</small>
+          </div>
+
+          <div class="gift" data-gift="3">
+            <div class="tag">🎁 Gift 3</div>
+            <h3>Open me</h3>
+            <small>The final surprise.</small>
+          </div>
+        </div>
+
+        <div class="footerHint">Pro tip: replace gift text with your real memories for max impact.</div>
+-->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal -->
+  <div class="modalBack" id="modalBack" role="dialog" aria-modal="true" aria-label="Gift modal">
+    <div class="modal">
+      <div class="modalTop">
+        <h3 id="modalTitle">Gift</h3>
+        <button class="x" id="closeModal" aria-label="Close">✕</button>
+      </div>
+
+      <p id="modalText"></p>
+
+      <div class="media" id="modalMedia">
+        <!-- Optional image inserted via JS. -->
+        <div id="mediaPlaceholder">
+          Put a photo here (optional). In code: gifts[n].img = "your-image-url.jpg"
+        </div>
+      </div>
+
+      <div class="footerHint">Click outside to close.</div>
+    </div>
+  </div>
+
+  <script>
+    // Confetti
+    const confettiCanvas = document.getElementById("confettiCanvas");
+    const confettiInstance = confetti.create(confettiCanvas, { resize: true });
+
+    function fullConfetti(){
+      const end = Date.now() + 1400;
+      (function frame(){
+        confettiInstance({
+          particleCount: 10,
+          spread: 90,
+          startVelocity: 42,
+          origin: { x: Math.random(), y: Math.random()*0.35 }
+        });
+        if(Date.now() < end) requestAnimationFrame(frame);
+      })();
+
+      setTimeout(() => {
+        confettiInstance({
+          particleCount: 240,
+          spread: 140,
+          startVelocity: 60,
+          origin: { x: 0.5, y: 0.58 }
+        });
+      }, 260);
+    }
+
+    // Pages
+    const pageIntro = document.getElementById("pageIntro");
+    const pageAsk = document.getElementById("pageAsk");
+    const pageYes = document.getElementById("pageYes");
+
+    function showPage(p){
+      [pageIntro,pageAsk,pageYes].forEach(x => x.classList.remove("active"));
+      p.classList.add("active");
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => showPage(pageAsk));
+
+    // No button dodge logic (works on touch + mouse)
+    const zone = document.getElementById("zone");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+    const hint   = document.getElementById("hint");
+
+    let yesScale = 1;
+
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+    function growYes(){
+      yesScale = Math.min(2.2, yesScale + 0.10);
+      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+    }
+
+    function moveNoAway(px, py){
+      const z = zone.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+
+      let dx = (b.left + b.width/2) - px;
+      let dy = (b.top  + b.height/2) - py;
+
+      let mag = Math.hypot(dx, dy) || 1;
+      dx /= mag; dy /= mag;
+
+      let newLeft = (b.left - z.left) + dx * 140;
+      let newTop  = (b.top  - z.top ) + dy * 140;
+
+      newLeft = clamp(newLeft, 8, z.width - b.width - 8);
+      newTop  = clamp(newTop, 12, z.height - b.height - 12);
+
+      noBtn.style.left = newLeft + "px";
+      noBtn.style.top  = newTop + "px";
+      noBtn.style.transform = "none";
+
+      growYes();
+    }
+
+    zone.addEventListener("pointermove", (e) => {
+      const b = noBtn.getBoundingClientRect();
+      const d = Math.hypot((b.left + b.width/2) - e.clientX, (b.top + b.height/2) - e.clientY);
+      if(d < 140) moveNoAway(e.clientX, e.clientY);
+    });
+
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      hint.textContent = "Nice try 😄";
+    });
+
+    yesBtn.addEventListener("click", () => {
+      fullConfetti();
+      showPage(pageYes);
+    });
+
+    // Gifts modal content (EDIT THESE)
+    const gifts = {
+      1: {
+        title: "Gift 1: A Message 💌",
+        text:
+          "Shikhaa, you make my days lighter and my brain quieter (rare achievement). " +
+          "If love had a UI, you’d be the dark mode fix that finally works. 💖",
+        img: "" // optional: "https://your-image-link.jpg"
+      },
+      2: {
+        title: "Gift 2: Redeem Coupon 🎟️",
+        text:
+          "This coupon can be redeemed for: one long hug, one movie date, and unlimited forehead kisses. " +
+          "No expiry. No refunds. 💞",
+        img: ""
+      },
+      3: {
+        title: "Gift 3: The Final Surprise 🌹",
+        text:
+          "I’m taking you out on Valentine’s. You just have to pick: coffee, dinner, or both. (Correct answer: both.) 😌❤️",
+        img: ""
+      }
+    };
+
+    const modalBack = document.getElementById("modalBack");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalText = document.getElementById("modalText");
+    const modalMedia = document.getElementById("modalMedia");
+    const closeModal = document.getElementById("closeModal");
+
+    function openGift(n){
+      const g = gifts[n];
+      modalTitle.textContent = g.title;
+      modalText.textContent = g.text;
+
+      // media
+      modalMedia.innerHTML = "";
+      if(g.img){
+        const img = document.createElement("img");
+        img.src = g.img;
+        img.alt = "Gift image";
+        modalMedia.appendChild(img);
+      } else {
+        const div = document.createElement("div");
+        div.style.opacity = ".75";
+        div.style.padding = "18px";
+        div.style.textAlign = "center";
+        div.innerHTML = "Optional photo here ✨<br><small>(Add image link inside code)</small>";
+        modalMedia.appendChild(div);
+      }
+
+      modalBack.classList.add("show");
+      fullConfetti();
+    }
+
+    document.querySelectorAll(".gift").forEach(el => {
+      el.addEventListener("click", () => openGift(el.dataset.gift));
+    });
+
+    function closeGift(){
+      modalBack.classList.remove("show");
+    }
+
+    closeModal.addEventListener("click", closeGift);
+    modalBack.addEventListener("click", (e) => {
+      if(e.target === modalBack) closeGift();
+    });
+
+    // Start on intro
+    showPage(pageIntro);
+  </script>
+</body>
+</html>
